@@ -6,12 +6,12 @@
   <title>Commits</title>
 </head>
 <body>
-  <input type="text" id="taskInput" placeholder="Nova tarefa...">
-<!-- Mude de addTask() para enviarComentario() -->
-<button type="button" onclick="enviarComentario()">Enviar</button>
+  <!-- Verifique se o id é exatamente este -->
+<input type="text" id="comentarioInput" placeholder="Escreva um comentário...">
+<button onclick="enviarComentario()">Enviar</button>
 
-
-<ul id="taskList"></ul>
+<!-- Onde os comentários vão aparecer -->
+<ul id="listaComentarios"></ul>
 <script src="script.js"></script>
 </body>
 </html>

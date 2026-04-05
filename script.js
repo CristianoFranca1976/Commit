@@ -16,15 +16,18 @@ async function enviarComentario() {
 // Função para LISTAR os comentários vindos do banco
 async function listarComentarios() {
     const response = await fetch('/api/comentarios');
-    const dados = await response.json();
     
-    const lista = document.getElementById('listaComentarios');
-    lista.innerHTML = ''; // Limpa a lista atual
+    // Se der erro 500, vamos ver o texto do erro antes de tentar converter para JSON
+    if (!response.ok) {
+        const erroTexto = await response.text();
+        console.error("Erro do Servidor:", erroTexto);
+        return;
+    }
 
-    dados.forEach(item => {
-        lista.innerHTML += `<li>${item.texto}</li>`;
-    });
+    const dados = await response.json();
+    // ... resto do código
 }
+
 
 // Carregar ao abrir a página
 listarComentarios();
