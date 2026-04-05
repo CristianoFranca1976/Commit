@@ -1,13 +1,32 @@
-import { sql } from '@vercel/postgres';
+import pg from 'pg';
+const { Pool } = pg;
 
-export default async function handler(req, res) {
+// Criamos a conexão manualmente usando a URL que está na sua Vercel
+const pool = new Pool({
+  connectionString: process.env.POSTGRES_URL + "?sslmode=require",
+});
+
+export default async function handler(request, response) {
+  const client = await pool.connect();
+
   try {
-    // Teste de conexão direto
-    const { rows } = await sql`SELECT NOW();`;
-    return res.status(200).json({ status: "Conectado!", data: rows });
+    // 1. Rota para SALVAR (POST)
+    if (request.method === 'POST') {
+      const { texto } = request.body;
+      await client.query('INSERT INTO comentarios (texto) VALUES ($1)', [texto]);
+      return response.status(200).json({ mensagem: "Sucesso!" });
+    }
+
+    // 2. Rota para LISTAR (GET)
+    if (request.method === 'GET') {
+      const { rows } = await client.query('SELECT * FROM comentarios ORDER BY id DESC');
+      return response.status(200).json(rows);
+    }
   } catch (error) {
-    // Se cair aqui, o erro nos Logs da Vercel dirá exatamente o que falta
-    console.error("ERRO NO BANCO:", error.message);
-    return res.status(500).json({ error: error.message });
+    console.error(error);
+    return response.status(500).json({ error: error.message });
+  } finally {
+    client.release(); // Liberta a conexão para não travar o banco
   }
 }
+
