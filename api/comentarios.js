@@ -1,23 +1,26 @@
-import { db } from '@vercel/postgres'; // Mudamos de 'sql' para 'db'
+import { createPool } from '@vercel/postgres';
 
 export default async function handler(request, response) {
-  const client = await db.connect(); // Isto força a ligação usando as variáveis do painel
+  // Criamos a ligação aqui dentro para garantir que ele lê as variáveis novas
+  const db = createPool();
 
   if (request.method === 'POST') {
     const { texto } = request.body;
     try {
-      await client.sql`INSERT INTO comentarios (texto) VALUES (${texto});`;
+      await db.sql`INSERT INTO comentarios (texto) VALUES (${texto});`;
       return response.status(200).json({ mensagem: "Sucesso!" });
     } catch (error) {
+      console.error(error);
       return response.status(500).json({ error: error.message });
     }
   }
 
   if (request.method === 'GET') {
     try {
-      const { rows } = await client.sql`SELECT * FROM comentarios ORDER BY id DESC;`;
+      const { rows } = await db.sql`SELECT * FROM comentarios ORDER BY id DESC;`;
       return response.status(200).json(rows);
     } catch (error) {
+      console.error(error);
       return response.status(500).json({ error: error.message });
     }
   }
