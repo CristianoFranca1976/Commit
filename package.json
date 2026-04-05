@@ -1,0 +1,15 @@
+{
+  "name": "commit",
+  "version": "1.0.0",
+  "description": "Sistema de comentários com Vercel Postgres",
+  "type": "module",
+  "main": "api/comentarios.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Cristiano Franca",
+  "license": "ISC",
+  "dependencies": {
+    "@vercel/postgres": "^0.10.0"
+  }
+}
