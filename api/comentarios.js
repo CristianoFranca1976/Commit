@@ -1,4 +1,13 @@
-export default function handler(req, res) {
-  const temSenha = process.env.POSTGRES_URL ? "SIM, a senha está aqui!" : "NÃO, a senha sumiu!";
-  return res.status(200).json({ status: temSenha, url: process.env.POSTGRES_URL ? "URL encontrada" : "URL vazia" });
+import { sql } from '@vercel/postgres';
+
+export default async function handler(req, res) {
+  try {
+    // Teste de conexão direto
+    const { rows } = await sql`SELECT NOW();`;
+    return res.status(200).json({ status: "Conectado!", data: rows });
+  } catch (error) {
+    // Se cair aqui, o erro nos Logs da Vercel dirá exatamente o que falta
+    console.error("ERRO NO BANCO:", error.message);
+    return res.status(500).json({ error: error.message });
+  }
 }
