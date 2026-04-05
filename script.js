@@ -1,38 +1,30 @@
-let tasks = JSON.parse(localStorage.getItem('minhasTarefas')) || [];
+// Função para ENVIAR um comentário
+async function enviarComentario() {
+    const input = document.getElementById('comentarioInput');
+    const texto = input.value;
 
-function addTask() {
-    const input = document.getElementById('taskInput');
-    if (input.value === '') return;
+    await fetch('/api/comentarios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ texto: texto })
+    });
 
-    const newTask = {
-        id: Date.now(),
-        text: input.value
-    };
-
-    tasks.push(newTask);
-    saveAndRender();
-    input.value = '';
+    input.value = ''; // Limpa o campo
+    listarComentarios(); // Atualiza a lista no ecrã
 }
 
-function deleteTask(id) {
-    tasks = tasks.filter(task => task.id !== id);
-    saveAndRender();
-}
+// Função para LISTAR os comentários vindos do banco
+async function listarComentarios() {
+    const response = await fetch('/api/comentarios');
+    const dados = await response.json();
+    
+    const lista = document.getElementById('listaComentarios');
+    lista.innerHTML = ''; // Limpa a lista atual
 
-
-function saveAndRender() {
-    localStorage.setItem('minhasTarefas', JSON.stringify(tasks));
-    const list = document.getElementById('taskList');
-    list.innerHTML = '';
-
-    tasks.forEach(task => {
-        list.innerHTML += `
-            <li>
-                ${task.text} 
-                <button onclick="deleteTask(${task.id})">Remover</button>
-            </li>`;
+    dados.forEach(item => {
+        lista.innerHTML += `<li>${item.texto}</li>`;
     });
 }
 
-// Carregar dados ao abrir a página
-saveAndRender();
+// Carregar ao abrir a página
+listarComentarios();
