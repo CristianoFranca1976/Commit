@@ -1,27 +1,28 @@
-import { createPool } from '@vercel/postgres';
+import pg from 'pg';
+const { Pool } = pg;
+
+// Criamos a conexão usando a variável de ambiente exata que a Vercel cria
+const pool = new Pool({
+  connectionString: process.env.POSTGRES_URL + "?sslmode=require",
+});
 
 export default async function handler(request, response) {
-  // Criamos a ligação aqui dentro para garantir que ele lê as variáveis novas
-  const db = createPool();
+  const client = await pool.connect();
 
-  if (request.method === 'POST') {
-    const { texto } = request.body;
-    try {
-      await db.sql`INSERT INTO comentarios (texto) VALUES (${texto});`;
+  try {
+    if (request.method === 'POST') {
+      const { texto } = request.body;
+      await client.query('INSERT INTO comentarios (texto) VALUES ($1)', [texto]);
       return response.status(200).json({ mensagem: "Sucesso!" });
-    } catch (error) {
-      console.error(error);
-      return response.status(500).json({ error: error.message });
     }
-  }
 
-  if (request.method === 'GET') {
-    try {
-      const { rows } = await db.sql`SELECT * FROM comentarios ORDER BY id DESC;`;
+    if (request.method === 'GET') {
+      const { rows } = await client.query('SELECT * FROM comentarios ORDER BY id DESC');
       return response.status(200).json(rows);
-    } catch (error) {
-      console.error(error);
-      return response.status(500).json({ error: error.message });
     }
+  } catch (error) {
+    return response.status(500).json({ error: error.message });
+  } finally {
+    client.release(); // Importante para não travar o banco
   }
 }
